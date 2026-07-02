@@ -93,8 +93,16 @@ class DistributedExecutor:
             # Workflow ID provided directly - assume it's already registered
             workflow_id = workflow
         else:
-            # WorkflowDefinition provided - submit blueprint first
-            blueprint_dict = BlueprintSerializer.to_dict(workflow)
+            # Handle WorkflowMetadata (from @workflow decorator)
+            if hasattr(workflow, '_built_definition') and workflow._built_definition:
+                wf_def = workflow._built_definition
+            elif hasattr(workflow, '_build'):
+                workflow._build()
+                wf_def = workflow._built_definition
+            else:
+                wf_def = workflow
+
+            blueprint_dict = BlueprintSerializer.to_dict(wf_def)
             blueprint_pb = self._dict_to_blueprint(blueprint_dict)
 
             # Submit blueprint for validation
