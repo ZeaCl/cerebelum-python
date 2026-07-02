@@ -96,11 +96,14 @@ class DistributedExecutor:
             # Handle WorkflowMetadata (from @workflow decorator)
             if hasattr(workflow, '_built_definition') and workflow._built_definition:
                 wf_def = workflow._built_definition
+                wf_name = workflow.name
             elif hasattr(workflow, '_build'):
                 workflow._build()
                 wf_def = workflow._built_definition
+                wf_name = workflow.name
             else:
                 wf_def = workflow
+                wf_name = workflow.id
 
             blueprint_dict = BlueprintSerializer.to_dict(wf_def)
             blueprint_pb = self._dict_to_blueprint(blueprint_dict)
@@ -111,7 +114,7 @@ class DistributedExecutor:
             if not validation.valid:
                 raise ValidationError(list(validation.errors))
 
-            workflow_id = workflow.id
+            workflow_id = wf_name
 
         # Execute workflow
         execute_request = ExecuteRequest(
