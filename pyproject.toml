@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cerebelum-sdk"
+version = "0.1.0"
+description = "Python SDK for Cerebelum workflow orchestration engine"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+dependencies = [
+    "grpcio>=1.60",
+    "protobuf>=4.25",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.23",
+]
+
+[project.urls]
+Homepage = "https://github.com/ZeaCl/cerebelum"
+Repository = "https://github.com/ZeaCl/cerebelum-python"
+Documentation = "https://github.com/ZeaCl/cerebelum-python#readme"
