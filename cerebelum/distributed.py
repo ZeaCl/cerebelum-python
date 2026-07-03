@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 from typing import Any, Dict, Optional, Union
 
 import grpc
@@ -51,18 +52,18 @@ class DistributedExecutor:
 
     def __init__(
         self,
-        core_url: str,
+        core_url: Optional[str] = None,
         worker_id: str = "python-executor",
         timeout: float = 30.0,
     ):
         """Initialize distributed executor.
 
         Args:
-            core_url: gRPC URL of Core BEAM (e.g., "localhost:50051")
+            core_url: gRPC URL (default: CEREBELUM_URL env or localhost:50051)
             worker_id: Unique worker identifier
             timeout: Request timeout in seconds
         """
-        self.core_url = core_url
+        self.core_url = core_url or os.environ.get("CEREBELUM_URL", "localhost:50051")
         self.worker_id = worker_id
         self.timeout = timeout
 
