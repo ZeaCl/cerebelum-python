@@ -13,7 +13,7 @@ from .builder import WorkflowBuilder, DivergeRule, BranchRule
 from .validator import WorkflowValidator, ValidationReport
 from .serializer import DSLSerializer
 from .execution import DSLExecutionAdapter, DSLLocalExecutor
-from .async_helpers import sleep, poll, retry, ProgressReporter
+from .async_helpers import sleep, wait_for_approval, poll, retry, ProgressReporter
 from .exceptions import (
     DSLError,
     StepDefinitionError,
@@ -40,6 +40,7 @@ __all__ = [
     "Context",
     # Async Helpers (Phase 7 - Long-running operations)
     "sleep",
+    "wait_for_approval",
     "poll",
     "retry",
     "ProgressReporter",

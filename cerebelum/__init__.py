@@ -100,6 +100,7 @@ from .dsl import (
     DSLExecutionAdapter,
     # Async helpers (Phase 7)
     sleep,
+    wait_for_approval,
     poll,
     retry,
     ProgressReporter,
@@ -125,6 +126,7 @@ __all__ = [
     "DSLExecutionAdapter",
     # Async Helpers (Phase 7 - Long-running operations)
     "sleep",
+    "wait_for_approval",
     "poll",
     "retry",
     "ProgressReporter",
