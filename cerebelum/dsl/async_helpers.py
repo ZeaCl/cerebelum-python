@@ -9,7 +9,7 @@ import time
 from typing import Callable, Any, Optional, TypeVar, Union
 from datetime import timedelta
 
-from .workflow_markers import SleepMarker
+from .workflow_markers import SleepMarker, ApprovalMarker
 
 T = TypeVar('T')
 
@@ -67,6 +67,49 @@ async def sleep(duration: Union[int, float, timedelta], data: Optional[dict] = N
     # - Distributed: sends SLEEP TaskResult to Core (enables resurrection)
     # - Local: catches and calls asyncio.sleep()
     raise SleepMarker(duration_ms, data)
+
+
+async def wait_for_approval(
+    approval_type: str = "manual",
+    data: Optional[dict] = None,
+    timeout_ms: Optional[int] = None
+) -> None:
+    """Request human approval before continuing the workflow.
+
+    Pauses the workflow and waits for a human to approve (or reject) via
+    the Cerebelum API or CLI. The workflow state is preserved and can
+    survive system restarts.
+
+    Args:
+        approval_type: Type of approval ("manual", "automated", etc.)
+        data: Context data for the approver (e.g., document to review)
+        timeout_ms: Optional timeout in milliseconds
+
+    Examples:
+        >>> from cerebelum import step, wait_for_approval
+        >>>
+        >>> @step
+        >>> async def review_document(context, **kwargs):
+        >>>     document = kwargs.get("generate_document", {})
+        >>>     await wait_for_approval(
+        >>>         approval_type="manual",
+        >>>         data={"document_id": document["id"], "preview": document["content"]},
+        >>>         timeout_ms=3_600_000  # 1 hour
+        >>>     )
+        >>>     return {"status": "approved"}
+
+    Notes:
+        - Distributed mode: Raises ApprovalMarker that worker catches
+        - The workflow pauses at this step until approval is received
+        - Approve via: POST /api/v1/executions/:id/approve
+        - Reject via: cerebelum execution approve <id> --response '{...}'
+        - If timeout_ms is set and expires, the workflow fails
+    """
+    raise ApprovalMarker(
+        approval_type=approval_type,
+        data=data or {},
+        timeout_ms=timeout_ms
+    )
 
 
 async def poll(
