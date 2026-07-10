@@ -105,6 +105,7 @@ async def wait_for_approval(
         - Reject via: cerebelum execution approve <id> --response '{...}'
         - If timeout_ms is set and expires, the workflow fails
     """
+    print(f"!!! wait_for_approval() called: type={approval_type} timeout={timeout_ms}", flush=True)
     raise ApprovalMarker(
         approval_type=approval_type,
         data=data or {},

@@ -578,7 +578,9 @@ class Worker:
             inputs = self._struct_to_dict(task.step_inputs)
 
             # Execute step - unpack dict as keyword arguments
+            print(f"!!! Calling step: {step_name} from {step_function.__module__}", flush=True)
             output = await step_function(ctx, **inputs)
+            print(f"!!! Step completed normally: {str(output)[:100]}", flush=True)
 
             # Convert output to protobuf Struct
             result_struct = self._dict_to_struct(output)
@@ -595,6 +597,7 @@ class Worker:
 
         except WorkflowMarker as marker:
             # Handle workflow control flow markers (sleep, approval, etc.)
+            print(f"!!! WorkflowMarker caught: {type(marker).__name__}", flush=True)
             from .dsl.workflow_markers import SleepMarker, ApprovalMarker
 
             if isinstance(marker, SleepMarker):
@@ -617,6 +620,7 @@ class Worker:
 
             elif isinstance(marker, ApprovalMarker):
                 # Use native protobuf TaskStatus.APPROVAL with approval_request field
+                print(f"!!! APPROVAL MARKER CAUGHT: type={marker.approval_type} data={marker.data}", flush=True)
                 approval_request = ApprovalRequest(
                     approval_type=marker.approval_type,
                     data=self._dict_to_struct(marker.data),
@@ -639,6 +643,7 @@ class Worker:
 
         except Exception as e:
             import traceback
+            print(f"!!! Generic Exception caught: {type(e).__name__}: {e}", flush=True)
 
             error_info = ErrorInfo(
                 kind=type(e).__name__,

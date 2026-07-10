@@ -10,6 +10,7 @@ from typing import Callable, List, Optional, Any, Dict, TypeVar, ParamSpec
 from .composition import StepComposition
 from .registry import StepRegistry, WorkflowRegistry
 from .exceptions import StepDefinitionError, WorkflowDefinitionError
+from .workflow_markers import WorkflowMarker
 
 # Type variables for generic function signatures
 P = ParamSpec('P')
@@ -104,11 +105,12 @@ class StepMetadata:
         return f"StepMetadata(name='{self.name}', dependencies={self.dependencies})"
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
-        """Allow calling the original function.
-
-        This enables the step to be called directly during testing.
-        """
-        return self.function(*args, **kwargs)
+        import asyncio
+        print(f"!!! StepMetadata.__call__: {self.name} func={self.function} type={type(self.function)}", flush=True)
+        result = self.function(*args, **kwargs)
+        if asyncio.iscoroutine(result):
+            print(f"!!! awaiting coroutine", flush=True)
+        return result
 
 
 class WorkflowMetadata:
@@ -457,6 +459,10 @@ def step(func: Callable[P, R]) -> StepMetadata:
             # Auto-wrap in {"ok": ...}
             return {"ok": result}
 
+        except WorkflowMarker:
+            # Re-raise workflow control markers (approval, sleep, etc.)
+            # so the worker can handle them properly
+            raise
         except Exception as e:
             # Auto-catch exceptions and convert to {"error": ...}
             return {"error": str(e)}
